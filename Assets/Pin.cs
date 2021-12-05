@@ -24,4 +24,9 @@ public class Pin : MonoBehaviour
         hasMoved = HasMoved();
     }
 
+    public void RestorePosition(){
+        this.transform.position = _originalPosition;
+        this.transform.rotation = _originalRotation;
+    }
+
 }

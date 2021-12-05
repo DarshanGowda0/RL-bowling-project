@@ -55,16 +55,19 @@ public class Player : Agent
 
     void FixedUpdate()
     {
-        if (Input.GetKeyDown("space"))
-        {
-            rBody.AddForce(new Vector3(forceX, 0f, forceZ), ForceMode.VelocityChange);
-            rBody.AddTorque(new Vector3(spinX, spinY, spinZ), ForceMode.Force);
-        }
+        // if (Input.GetKeyDown("space"))
+        // {
+        //     rBody.AddForce(new Vector3(forceX, 0f, forceZ), ForceMode.VelocityChange);
+        //     rBody.AddTorque(new Vector3(spinX, spinY, spinZ), ForceMode.Force);
+        // }
     }
 
     void Update()
     {
-        
+        // TODO: remove this
+        // float xforce = Input.GetAxis("Horizontal");
+        // float zforce = Input.GetAxis("Vertical");
+        // rBody.AddForce(new Vector3(xforce, 0f, zforce), ForceMode.VelocityChange);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -94,6 +97,11 @@ public class Player : Agent
                 oldPosition.y,
                 UnityEngine.Random.Range(planeZmin, planeZmax)
             );
+
+        foreach(Pin pin in _pins)
+        {
+            pin.RestorePosition();
+        }
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -142,6 +150,13 @@ public class Player : Agent
             return false;
         }
         return true;
+    }
+
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
+        var continuousActionsOut = actionsOut.ContinuousActions;
+        continuousActionsOut[0] = Input.GetAxis("Horizontal");
+        continuousActionsOut[1] = Input.GetAxis("Vertical");
     }
 
 
