@@ -28,14 +28,29 @@ public class Player : Agent
     private float planeZmin = -11f;
 
     Rigidbody rBody;
-    // [SerializeField] float m_Thrust = 20f;
-    // Start is called before the first frame update
+
+    [HideInInspector] public Pin[] _pins;
+
     void Start()
     {
         rBody = GetComponent<Rigidbody>();
         // rBody.maxAngularVelocity = angularVelocity;
         oldPosition = transform.position;
         oldRot = transform.rotation;
+        storeGameObjects();
+    }
+
+
+    void storeGameObjects()
+    {
+        if ((_pins = FindObjectsOfType<Pin>()) == null || _pins.Length < 1)
+        {
+            Debug.LogError("No pin founded.");
+        }
+        else
+        {
+            Debug.Log("Found " + _pins.Length + "pins!");
+        }
     }
 
     void FixedUpdate()
@@ -49,19 +64,28 @@ public class Player : Agent
 
     void Update()
     {
-
-        // check pins are standing, if any have fallen set reward and end episode
         
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        // check pins are standing, if any have fallen set reward and end episode
+        int numberOfPinsKnocked = 0;
+        foreach(Pin pin in _pins){
+            if (pin.hasMoved)
+            {
+                numberOfPinsKnocked += 1;
+            }
+        }
+        Debug.Log("Number of pins knocked -> "+numberOfPinsKnocked);
+        if (numberOfPinsKnocked > 0){
+            SetReward(numberOfPinsKnocked * 1.0f );
+            EndEpisode();
+        }
     }
 
     public override void OnEpisodeBegin()
     {
-        //  reset position to random position
-        if (transform.localPosition.y < 0)
-        {
-
-        }
-
         rBody.angularVelocity = Vector3.zero;
         rBody.velocity = Vector3.zero;
 
@@ -75,7 +99,7 @@ public class Player : Agent
     public override void CollectObservations(VectorSensor sensor)
     {
         // add balls position - 3 params
-        sensor.AddObersvation(this.transform.localPosition);
+        sensor.AddObservation(this.transform.localPosition);
 
         // add velocity - 3 params
         sensor.AddObservation(rBody.velocity);
@@ -87,21 +111,15 @@ public class Player : Agent
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        // check if the ball is off the platform
-        if (this.transform.localPosition.y < 0)
-        {
-            EndEpisode();
-        }
-
         // check if the x, x lie within the initial plane, then take action and roll the ball
         if (isBallInPlane())
         {
             // collect the action value
-            float _forceX = actionBuffers.ContinousActions[0];
-            float _forceZ = actionBuffers.ContinousActions[1];
-            float _spinX = actionBuffers.ContinousActions[2];
-            float _spinY = actionBuffers.ContinousActions[3];
-            float _spinZ = actionBuffers.ContinousActions[4];
+            float _forceX = actionBuffers.ContinuousActions[0];
+            float _forceZ = actionBuffers.ContinuousActions[1];
+            float _spinX = actionBuffers.ContinuousActions[2];
+            float _spinY = actionBuffers.ContinuousActions[3];
+            float _spinZ = actionBuffers.ContinuousActions[4];
 
             // perform the action
             rBody.AddForce(new Vector3(_forceX, 0f, _forceZ), ForceMode.VelocityChange);
@@ -112,7 +130,17 @@ public class Player : Agent
 
     public bool isBallInPlane()
     {
+        // check if the ball is off the platform
+        if (this.transform.localPosition.y < 0)
+        {
+            EndEpisode();
+            return false;
+        }
         // TODO: check ball is within the range
+        if (this.transform.localPosition.x < planeXmin || this.transform.localPosition.x > planeXmax || this.transform.localPosition.z < planeZmin || this.transform.localPosition.z > planeZmax)
+        {
+            return false;
+        }
         return true;
     }
 
