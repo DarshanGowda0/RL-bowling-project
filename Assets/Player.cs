@@ -30,7 +30,7 @@ public class Player : Agent
     Rigidbody rBody;
 
     [HideInInspector] public Pin[] _pins;
-
+    private int numberOfPinsKnocked = 0;
     void Start()
     {
         rBody = GetComponent<Rigidbody>();
@@ -45,50 +45,33 @@ public class Player : Agent
     {
         if ((_pins = FindObjectsOfType<Pin>()) == null || _pins.Length < 1)
         {
-            Debug.LogError("No pin founded.");
+            Debug.LogError("No pins found.");
         }
-        else
+    }
+
+    void checkForGameEnd()
+    {
+        foreach (Pin pin in _pins)
         {
-            Debug.Log("Found " + _pins.Length + "pins!");
-        }
-    }
-
-    void FixedUpdate()
-    {
-        // if (Input.GetKeyDown("space"))
-        // {
-        //     rBody.AddForce(new Vector3(forceX, 0f, forceZ), ForceMode.VelocityChange);
-        //     rBody.AddTorque(new Vector3(spinX, spinY, spinZ), ForceMode.Force);
-        // }
-    }
-
-    void Update()
-    {
-        // TODO: remove this
-        // float xforce = Input.GetAxis("Horizontal");
-        // float zforce = Input.GetAxis("Vertical");
-        // rBody.AddForce(new Vector3(xforce, 0f, zforce), ForceMode.VelocityChange);
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        // check pins are standing, if any have fallen set reward and end episode
-        int numberOfPinsKnocked = 0;
-        foreach(Pin pin in _pins){
-            if (pin.hasMoved)
+            if (pin.HasMoved())
             {
                 numberOfPinsKnocked += 1;
             }
         }
-        Debug.Log("Number of pins knocked -> "+numberOfPinsKnocked);
-        if (numberOfPinsKnocked > 0){
-            SetReward(numberOfPinsKnocked * 1.0f );
-            EndEpisode();
+        arePinsDown();
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "pins")
+        {
+            Invoke("checkForGameEnd", 2);
         }
     }
 
     public override void OnEpisodeBegin()
     {
+        Debug.Log("On Episode begin: resetting!");
         rBody.angularVelocity = Vector3.zero;
         rBody.velocity = Vector3.zero;
 
@@ -97,8 +80,9 @@ public class Player : Agent
                 oldPosition.y,
                 UnityEngine.Random.Range(planeZmin, planeZmax)
             );
-
-        foreach(Pin pin in _pins)
+        // this.transform.localPosition = oldPosition;
+        numberOfPinsKnocked = 0;
+        foreach (Pin pin in _pins)
         {
             pin.RestorePosition();
         }
@@ -117,8 +101,18 @@ public class Player : Agent
 
     }
 
+    void arePinsDown()
+    {
+        if (numberOfPinsKnocked > 0)
+        {
+            Debug.Log("Number of pins knocked -> " + numberOfPinsKnocked);
+            SetReward(numberOfPinsKnocked * 1.0f);
+            EndEpisode();
+        }
+    }
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
+
         // check if the x, x lie within the initial plane, then take action and roll the ball
         if (isBallInPlane())
         {
@@ -129,9 +123,11 @@ public class Player : Agent
             float _spinY = actionBuffers.ContinuousActions[3];
             float _spinZ = actionBuffers.ContinuousActions[4];
 
+            // Debug.Log("Applying force " + forceX + ", " + forceZ);
             // perform the action
             rBody.AddForce(new Vector3(_forceX, 0f, _forceZ), ForceMode.VelocityChange);
             rBody.AddTorque(new Vector3(_spinX, _spinY, _spinZ), ForceMode.Force);
+
         }
     }
 
@@ -139,14 +135,18 @@ public class Player : Agent
     public bool isBallInPlane()
     {
         // check if the ball is off the platform
-        if (this.transform.localPosition.y < 0)
+        if (this.transform.localPosition.y < -50)
         {
+            Debug.Log("Ball y below 5, end episode!");
+            SetReward(-5.0f);
             EndEpisode();
             return false;
         }
+        return true;
         // TODO: check ball is within the range
         if (this.transform.localPosition.x < planeXmin || this.transform.localPosition.x > planeXmax || this.transform.localPosition.z < planeZmin || this.transform.localPosition.z > planeZmax)
         {
+            Debug.Log("Ball not in plane!");
             return false;
         }
         return true;
@@ -154,6 +154,7 @@ public class Player : Agent
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
+        // Debug.Log("Calling heuristic!");
         var continuousActionsOut = actionsOut.ContinuousActions;
         continuousActionsOut[0] = Input.GetAxis("Horizontal");
         continuousActionsOut[1] = Input.GetAxis("Vertical");
