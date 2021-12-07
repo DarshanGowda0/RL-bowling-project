@@ -46,7 +46,7 @@ public class Player : Agent
     {
         if ((_pins = FindObjectsOfType<Pin>()) == null || _pins.Length < 1)
         {
-            Debug.LogError("No pins found.");
+            // Debug.LogError("No pins found.");
         }
         pinPosition = _pins[0].transform.position;
     }
@@ -109,18 +109,17 @@ public class Player : Agent
     {
         if (numberOfPinsKnocked > 0)
         {
-            Debug.Log("Number of pins knocked -> " + numberOfPinsKnocked);
+            // Debug.Log("Number of pins knocked -> " + numberOfPinsKnocked);
             AddReward(numberOfPinsKnocked * 10.0f);
             EndEpisode();
         }
     }
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-
-        AddReward(-0.01f);
         // check if the x, x lie within the initial plane, then take action and roll the ball
         if (isBallInPlane())
         {
+            AddReward(-0.1f);
             // collect the action value
             float _forceX = actionBuffers.ContinuousActions[0];
             float _forceZ = actionBuffers.ContinuousActions[1];
@@ -144,10 +143,10 @@ public class Player : Agent
     {
         if (rBody.velocity == Vector3.zero || rBody.angularVelocity == Vector3.zero)
         {
-            Debug.Log("Ball is idle, ending episode!");
+            // Debug.Log("Ball is idle, ending episode!");
             float dist = Vector3.Distance(transform.localPosition, pinPosition);
-            float reward = Mathf.Max(22f - dist, 1);
-            Debug.Log("Dist "+ dist + ", Reward "+ reward);
+            float reward = Mathf.Max(20f - dist, 1);
+            // Debug.Log("Dist "+ dist + ", Reward "+ reward);
             AddReward(reward);
             EndEpisode();
         }
@@ -159,7 +158,7 @@ public class Player : Agent
         if (this.transform.localPosition.y < -50)
         {
             // Debug.Log("Ball y below 5, end episode!");
-            SetReward(-5.0f);
+            SetReward(-10.0f);
             EndEpisode();
             return false;
         }

@@ -906,8 +906,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 991760996}
   m_LocalRotation: {x: -0, y: -0, z: 0.70710576, w: 0.70710784}
-  m_LocalPosition: {x: -8.904783, y: 1.3541044, z: 5.87}
-  m_LocalScale: {x: 0.09752827, y: 9.9102955, z: 0.96593046}
+  m_LocalPosition: {x: -8.904783, y: 1.3541044, z: 5.7407}
+  m_LocalScale: {x: 0.09752827, y: 9.9102955, z: 0.95852506}
   m_Children: []
   m_Father: {fileID: 1182273167}
   m_RootOrder: 0
@@ -1201,14 +1201,14 @@ MonoBehaviour:
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 5
-      BranchSizes: 05000000
-    VectorActionSize: 
+      BranchSizes: 
+    VectorActionSize: 05000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
-  m_BehaviorType: 1
+  m_BehaviorType: 0
   m_BehaviorName: player
   TeamId: 0
   m_UseChildSensors: 1
@@ -1459,11 +1459,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4214316018229846377, guid: 0e01bef36a7f7cf4c8788a85b4504057, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -6.78
+      value: 10.12
       objectReference: {fileID: 0}
     - target: {fileID: 4214316018229846377, guid: 0e01bef36a7f7cf4c8788a85b4504057, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.09
+      value: 0.32
       objectReference: {fileID: 0}
     - target: {fileID: 4214316018229846377, guid: 0e01bef36a7f7cf4c8788a85b4504057, type: 3}
       propertyPath: m_LocalPosition.z
