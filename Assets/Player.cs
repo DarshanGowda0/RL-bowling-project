@@ -27,7 +27,7 @@ public class Player : Agent
     private float planeZmax = 3.2f;
     private float planeZmin = -3.2f;
 
-    Rigidbody rBody;
+    [HideInInspector] public Rigidbody rBody;
 
     [HideInInspector] public Pin[] _pins;
     private int numberOfPinsKnocked = 0;
